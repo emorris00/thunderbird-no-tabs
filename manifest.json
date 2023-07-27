@@ -1,0 +1,39 @@
+{
+    "manifest_version": 2,
+    "version": "1.0",
+    "name": "No tabs",
+    "description": "Gets rid of tabs",
+    "browser_specific_settings": {
+        "gecko": {
+            "id": "{3341d8a8-69f5-4ae3-a365-980a65d560f8}",
+            "strict_min_version": "115.0",
+            "strict_max_version": "115.*"
+        }
+    },
+    "author": "Eric Morris",
+    "background": {
+        "scripts": [
+            "script.js"
+        ]
+    },
+    "experiment_apis": {
+        "WindowListener": {
+            "schema": "api/WindowListener/schema.json",
+            "parent": {
+                "scopes": [
+                    "addon_parent"
+                ],
+                "paths": [
+                    [
+                        "WindowListener"
+                    ]
+                ],
+                "script": "api/WindowListener/implementation.js"
+            }
+        }
+    },
+    "permissions": [
+        "tabs",
+        "theme"
+    ]
+}
