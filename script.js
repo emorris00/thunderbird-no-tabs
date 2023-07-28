@@ -1,6 +1,5 @@
 (async () => {
-    messenger.WindowListener.registerWindow("chrome://messenger/content/messenger.xhtml", "inject.js");
-    messenger.WindowListener.startListening();
+    messenger.LegacyCSS.inject("chrome://messenger/content/messenger.xhtml", "style.css");
 
     messenger.tabs.onCreated.addListener(async tab => {
         let inactiveTabs = await messenger.tabs.query({active: false});

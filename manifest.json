@@ -1,6 +1,6 @@
 {
     "manifest_version": 2,
-    "version": "1.0",
+    "version": "1.1",
     "name": "No tabs",
     "description": "Gets rid of tabs",
     "browser_specific_settings": {
@@ -17,23 +17,22 @@
         ]
     },
     "experiment_apis": {
-        "WindowListener": {
-            "schema": "api/WindowListener/schema.json",
+        "LegacyCSS": {
+            "schema": "api/LegacyCSS/schema.json",
             "parent": {
                 "scopes": [
                     "addon_parent"
                 ],
                 "paths": [
                     [
-                        "WindowListener"
+                        "LegacyCSS"
                     ]
                 ],
-                "script": "api/WindowListener/implementation.js"
+                "script": "api/LegacyCSS/implementation.js"
             }
         }
     },
     "permissions": [
-        "tabs",
-        "theme"
+        "tabs"
     ]
 }
