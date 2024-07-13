@@ -7,7 +7,7 @@
         "gecko": {
             "id": "{3341d8a8-69f5-4ae3-a365-980a65d560f8}",
             "strict_min_version": "115.0",
-            "strict_max_version": "115.*"
+            "strict_max_version": "128.*"
         }
     },
     "author": "Eric Morris",
