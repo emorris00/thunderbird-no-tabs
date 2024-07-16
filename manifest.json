@@ -1,6 +1,6 @@
 {
     "manifest_version": 2,
-    "version": "1.1.1",
+    "version": "1.1.2",
     "name": "No tabs",
     "description": "Hides the tab bar and automatically removes all inactive tabs everytime a tab is opened or switched to.",
     "browser_specific_settings": {
