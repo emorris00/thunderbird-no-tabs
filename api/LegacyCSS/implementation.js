@@ -1,14 +1,25 @@
 /*
- * This file is provided by the addon-developer-support repository at
- * https://github.com/thundernest/addon-developer-support
+ * This file is provided by the webext-support repository at
+ * https://github.com/thunderbird/webext-support
+ *
+ * Version 1.7
+ * - fix missing tracker reference (contributed by @mlazdans)
+ *   https://github.com/thunderbird/webext-support/pull/77
+ * 
+ * Version 1.6
+ * - registerChromeUrl() is now async, to be able to properly await registration
+ *
+ * Version 1.5
+ * - adjusted to TB128 (no longer loading Services and ExtensionCommon)
+ * - use ChromeUtils.importESModule()
  *
  * Version 1.4
  * - fix bug in waitForLoad()
- * 
+ *
  * Version 1.3
- * - allow injecting into nested browsers (needed for Thunderbird Supernova,
+ * - allow injecting into nested browsers (needed for Thunderbird 115,
  *   which loads about:3pane and about:message into nested browsers)
- * - adjusted to Thunderbird Supernova (Services is now in globalThis)
+ * - adjusted to Thunderbird 115 (Services is now in globalThis)
  *
  * Version 1.2
  * - fix multiple context not overwriting class members
@@ -25,24 +36,20 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 
+/* global Services, ExtensionCommon */
+
 "use strict";
 
 (function (exports) {
 
   // Import some things we need.
-  var { ExtensionCommon } = ChromeUtils.import(
-    "resource://gre/modules/ExtensionCommon.jsm"
+  var { ExtensionSupport } = ChromeUtils.importESModule(
+    "resource:///modules/ExtensionSupport.sys.mjs"
   );
-  var { ExtensionSupport } = ChromeUtils.import(
-    "resource:///modules/ExtensionSupport.jsm"
-  );
-  var { ExtensionUtils } = ChromeUtils.import(
-    "resource://gre/modules/ExtensionUtils.jsm"
+  var { ExtensionUtils } = ChromeUtils.importESModule(
+    "resource://gre/modules/ExtensionUtils.sys.mjs"
   );
   var { ExtensionError } = ExtensionUtils;
-  
-  var Services = globalThis.Services || 
-    ChromeUtils.import("resource://gre/modules/Services.jsm").Services;
 
   async function waitForLoad(window) {
     for (let i = 0; i < 20; i++) {
@@ -90,6 +97,7 @@
     }
 
     tabMonitor = {
+      tracker: this,
       onTabTitleChanged(aTab) { },
       onTabClosing(aTab) { },
       onTabPersist(aTab) { },
@@ -123,11 +131,11 @@
               aTab.browser.addProgressListener(reporterListener);
             });
           }
-          this.notifyOnOpenedListener(aTab.browser.contentWindow);
+          this.tracker.notifyOnOpenedListener(aTab.browser.contentWindow);
         }
 
         if (aTab.chromeBrowser) {
-          this.notifyOnOpenedListener(aTab.chromeBrowser.contentWindow);
+          this.tracker.notifyOnOpenedListener(aTab.chromeBrowser.contentWindow);
         }
       },
     }
@@ -181,7 +189,7 @@
       // super() will add the extension as a member of this.
       super(...args);
       tracker = new Tracker(this.extension);
-      
+
       ExtensionSupport.registerWindowListener(
         tracker.windowListenerId,
         {
@@ -205,7 +213,7 @@
             register: (fire) => {
               function listener(event, url) {
                 fire.sync(url);
-              } 
+              }
               tracker.addOnOpenedListener(listener);
               return () => {
                 tracker.removeOnOpenedListener(listener);
@@ -216,21 +224,24 @@
           async inject(url, cssFile) {
             let path = context.extension.rootURI.resolve(cssFile);
             const injectIntoWindow = async window => {
+              console.log(window)
               // Wait till window is fully loaded.
               try {
                 await waitForLoad(window);
               } catch (ex) {
                 return;
               };
-              
+
               // Inject CSS if window is a match.
               if (window.location.href === url && !tracker.hasCssFile(window, path)) {
+                console.log(`injecting css into ${url}`)
                 let element = window.document.createElement("link");
                 element.dataset.cssInjected = tracker.instanceId;
                 element.setAttribute("rel", "stylesheet");
                 element.setAttribute("href", path);
                 window.document.documentElement.appendChild(element);
                 tracker.trackCssFile(window, path);
+                console.log("injected")
               }
 
               // Scan for nested browsers.
@@ -300,11 +311,11 @@
           element => element.remove()
         );
       }
-      
+
       // Remove all injected CSS.
       for (let window of Services.wm.getEnumerator(null)) {
         removeFromWindow(window);
-        
+
         // Scan for nested browsers.
         let browsers = [];
         browsers = browsers.concat(...window.document.getElementsByTagName("browser"));
