@@ -1,13 +1,13 @@
 {
     "manifest_version": 2,
-    "version": "1.1.4",
+    "version": "1.1.5",
     "name": "No tabs",
     "description": "Hides the tab bar and automatically removes all inactive tabs everytime a tab is opened or switched to.",
     "browser_specific_settings": {
         "gecko": {
             "id": "{3341d8a8-69f5-4ae3-a365-980a65d560f8}",
             "strict_min_version": "115.0",
-            "strict_max_version": "142.*"
+            "strict_max_version": "143.*"
         }
     },
     "author": "Eric Morris",
